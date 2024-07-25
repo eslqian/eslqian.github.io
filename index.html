@@ -32,6 +32,11 @@
       fill: steelblue;
     }
 
+    .line {
+      fill: none;
+      stroke-width: 2px;
+    }
+
     .axis path,
     .axis line {
       fill: none;
@@ -55,6 +60,10 @@
       text-anchor: end;
       font-size: 12px;
     }
+
+    .legend {
+      font-size: 12px;
+    }
   </style>
   <script src="https://d3js.org/d3.v5.min.js"></script>
 </head>
@@ -73,7 +82,7 @@
       <svg width="600" height="400"></svg>
     </div>
     <div id="global-chart" class="chart">
-      <h3 class="chart-title">Global Sales Over Time</h3>
+      <h3 class="chart-title">Global Sales Over Time by Genre</h3>
       <svg width="600" height="400"></svg>
     </div>
   </div>
@@ -146,25 +155,39 @@
         .append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
+      const genres = ["Action", "Adventure", "Fighting", "Misc", "Platform", "Puzzle", "Racing", "Role-Playing", "Shooter", "Simulation", "Sports", "Strategy"];
+      const genreColors = d3.scaleOrdinal(d3.schemeCategory10).domain(genres);
+
+      const genreData = d3.nest()
+        .key(d => d.Genre)
+        .key(d => d.Year)
+        .rollup(values => d3.sum(values, d => d.Global_Sales))
+        .entries(salesData);
+
       const xScale = d3.scaleLinear()
         .domain(d3.extent(salesData, d => +d.Year))
         .range([0, width]);
 
       const yScale = d3.scaleLinear()
         .range([height, 0])
-        .domain([0, d3.max(salesData, d => +d.Global_Sales)]);
+        .domain([0, d3.max(genreData, g => d3.max(g.values, d => d.value))]);
 
       const line = d3.line()
-        .x(d => xScale(+d.Year))
-        .y(d => yScale(+d.Global_Sales));
+        .x(d => xScale(+d.key))
+        .y(d => yScale(d.value));
 
-      svg.append("path")
-        .datum(salesData)
-        .attr("class", "line")
-        .attr("fill", "none")
-        .attr("stroke", "steelblue")
-        .attr("stroke-width", 2)
-        .attr("d", line);
+      genres.forEach(genre => {
+        const data = genreData.find(d => d.key === genre);
+        if (data) {
+          svg.append("path")
+            .datum(data.values)
+            .attr("class", "line")
+            .attr("fill", "none")
+            .attr("stroke", genreColors(genre))
+            .attr("stroke-width", 2)
+            .attr("d", line);
+        }
+      });
 
       svg.append("g")
         .attr("class", "axis")
@@ -187,6 +210,25 @@
         .attr("y", -margin.left + 20)
         .style("text-anchor", "middle")
         .text("Global Sales (millions)");
+
+      // Add legend
+      const legend = svg.selectAll(".legend")
+        .data(genres)
+        .enter()
+        .append("g")
+        .attr("class", "legend")
+        .attr("transform", (d, i) => `translate(${i * 80}, ${height + margin.bottom - 10})`);
+
+      legend.append("rect")
+        .attr("x", 0)
+        .attr("width", 10)
+        .attr("height", 10)
+        .style("fill", genreColors);
+
+      legend.append("text")
+        .attr("x", 15)
+        .attr("y", 9)
+        .text(d => d);
     }
 
     // Load data from the CSV file
