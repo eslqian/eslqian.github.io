@@ -1,7 +1,299 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    #line-chart {
+      background-color: #fff;
+      border: 1px solid #ccc;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .line {
+      fill: none;
+      stroke: steelblue;
+      stroke-width: 2;
+    }
+
+
+    .axis path,
+    .axis line {
+      fill: none;
+      stroke: #ccc;
+      shape-rendering: crispEdges;
+    }
+
+    .axis text {
+      font-size: 12px;
+    }
+
+    .genre-btn {
+      margin: 5px;
+      padding: 8px 16px;
+      font-size: 14px;
+      cursor: pointer;
+      background-color: #007BFF;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+    }
+
+    .genre-btn:hover {
+      background-color: #0056b3;
+    }
+
+  </style>
+  <script src="https://d3js.org/d3.v5.min.js"></script>
+  <script src="https://rawgit.com/susielu/d3-annotation/master/d3-annotation.min.js"></script>
+
+</head>
 <body>
-<h1>Hello World</h1>
-<p>I'm hosted with GitHub Pages.</p>
+  <div id="chart-container">
+    <svg width="600" height="400" id="line-chart"></svg>
+  </div>
+  <div>
+    <p><b>Genre</b></p>
+    <button id="all-btn" class="genre-btn" data-genre="all">All</button>
+    <button id="action-btn" class="genre-btn" data-genre="all">Action</button>
+    <button id="comedy-btn" class="genre-btn" data-genre="all">Comedy</button>
+    <button id="romance-btn" class="genre-btn" data-genre="all">Romance</button>
+    <button id="drama-btn" class="genre-btn" data-genre="all">Drama</button>
+  </div>
+    <script>
+      // Set up the SVG dimensions and margins
+      const margin = { top: 30, right: 30, bottom: 50, left: 50 };
+      const width = 600 - margin.left - margin.right;
+      const height = 400 - margin.top - margin.bottom;
+
+      const svg = d3.select("#line-chart")
+        .append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+
+      const xScale = d3.scaleLinear()
+        .range([0, width]);
+
+      const yScale = d3.scaleLinear()
+        .range([height, 0]);
+
+      // Create x and y axes
+      const xAxis = d3.axisBottom(xScale)
+        .tickFormat(d3.format("d"));
+
+      const yAxis = d3.axisLeft(yScale);
+
+      // Define the line function
+      const line = d3.line()
+        .x(d => xScale(d.release_year))
+        .y(d => yScale(d.average_imdb_score));
+
+      // Load data from the CSV file
+      d3.csv("https://raw.githubusercontent.com/armaan-kohli/armaan-kohli.github.io/main/data/titles.csv").then(function(data) {
+        data.forEach(function(d) {
+          d.release_year = +d.release_year; // Convert to integer
+          d.imdb_score = +d.imdb_score;
+        });
+
+        data = data.filter(d => d.release_year > 1950);
+
+        function modifyAnnotiations(genre) {
+          d3.select(".annotations").remove();
+                                
+          var annotations = [];
+
+           if (genre === "all") {
+              annotations = [
+                  {
+                      note: {
+                        label: "These years had very low scores for movies.",
+                        title: "1991 & 1992"
+                      },
+                      x: 340,
+                      y: 350,
+                      dy: -50,
+                      dx: 50
+                  }
+              ]
+          } else if (genre === "action") {
+            annotations = [
+                  {
+                      note: {
+                        label: "Action movies rated well during these decades.",
+                        title: "1950s and 1960s"
+                      },
+                      x: 85,
+                      y: 160,
+                      dy: 0,
+                      dx: 0
+                  },
+                  {
+                      note: {
+                        label: "These years tended to rate worse for action movies.",
+                        title: "1990s onward"
+                      },
+                      x: 365,
+                      y: 210,
+                      dy: 0,
+                      dx: 0
+                  }
+              ]
+          } else if (genre === "comedy") {
+            annotations = [
+                  {
+                      note: {
+                        label: "The few comedy movies of these decades rated well",
+                        title: "1950s and 1960s"
+                      },
+                      x: 85,
+                      y: 160,
+                      dy: 0,
+                      dx: 0
+                  },
+                  {
+                      note: {
+                        label: "Comedy movies rated worse as the years progressed.",
+                        title: "1994 onward"
+                      },
+                      x: 365,
+                      y: 210,
+                      dy: 0,
+                      dx: 0
+                  }
+              ]
+          } else if (genre === "romance") {
+            annotations = [
+                  {
+                      note: {
+                        label: "The highest average score for any genre in a given year. ",
+                        title: "2001"
+                      },
+                      x: 410,
+                      y: 30,
+                      dy: 0,
+                      dx: 60
+                  }
+              ]
+          } else if (genre === "drama") {
+            annotations = [
+                  {
+                      note: {
+                        label: "Drama movies tended to rate consistently starting then.",
+                        title: "1980s Onward"
+                      },
+                      x: 250,
+                      y: 350,
+                      dy: -50,
+                      dx: 100
+                  }
+              ]
+          } 
+                        
+          const makeAnnotations = d3.annotation()
+            .annotations(annotations)
+            
+          d3.select("svg")
+              .append("g")
+              .call(makeAnnotations)
+        }
+
+        function updateChartByGenre(genre) {
+
+          let filteredData;
+          if (genre === "all") {
+            filteredData = data;
+          } else {
+            filteredData = data.filter(d => d.genres && d.genres.includes(genre));
+          }
+
+          //aggregate by mean
+          const aggregatedData = d3.nest()
+            .key(d => d.release_year)
+            .rollup(values => d3.mean(values, d => d.imdb_score))
+            .entries(filteredData);
+
+          const formattedData = aggregatedData.map(d => ({
+            release_year: d.key, // Keep it as an integer
+            average_imdb_score: d.value
+          }));
+
+          formattedData.sort((a, b) => d3.ascending(a.release_year, b.release_year));
+
+          console.log(formattedData);
+
+          xScale.domain(d3.extent(formattedData, d => d.release_year));
+          yScale.domain([d3.min(formattedData, d => d.average_imdb_score), d3.max(formattedData, d => d.average_imdb_score)]);
+
+          svg.select(".line").remove();
+
+          svg.append("path")
+            .datum(formattedData)
+            .attr("class", "line")
+            .attr("fill", "none")
+            .attr("stroke", "steelblue")
+            .attr("stroke-width", 2)
+            .attr("d", line);
+
+          modifyAnnotiations(genre)
+        }
+
+        updateChartByGenre("all");
+
+        svg.append("g")
+          .attr("transform", `translate(0,${height})`)
+          .call(xAxis);
+
+        svg.append("g")
+          .call(yAxis);
+
+        svg.append("text")
+          .attr("x", width / 2)
+          .attr("y", height + margin.bottom - 10)
+          .style("text-anchor", "middle")
+          .text("Release Year");
+
+        svg.append("text")
+          .attr("transform", "rotate(-90)")
+          .attr("x", -height / 2)
+          .attr("y", -margin.left + 20)
+          .style("text-anchor", "middle")
+          .text("Average IMDB Score");
+
+        svg.append("text")
+          .attr("x", width / 2)
+          .attr("y", -margin.top / 2)
+          .style("text-anchor", "middle")
+          .style("font-size", "16px")
+          .text("Average IMDB Scores of Movies Released");
+        
+        d3.select("#all-btn").on("click", function() {
+          updateChartByGenre("all");
+        });
+        d3.select("#comedy-btn").on("click", function() {
+          updateChartByGenre("comedy");
+        });
+        d3.select("#action-btn").on("click", function() {
+          updateChartByGenre("action");
+        });
+
+        d3.select("#romance-btn").on("click", function() {
+          updateChartByGenre("romance");
+        });
+
+        d3.select("#drama-btn").on("click", function() {
+          updateChartByGenre("drama");
+        });
+      });
+    </script>
 </body>
 </html>
