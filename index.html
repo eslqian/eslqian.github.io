@@ -6,9 +6,9 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f2f2f2;
+      background-color: #f9f9f9;
       margin: 0;
-      padding: 0;
+      padding: 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -16,9 +16,8 @@
 
     #charts-container {
       display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-      justify-content: center;
+      flex-direction: column;
+      align-items: center;
     }
 
     .chart {
@@ -26,6 +25,7 @@
       border: 1px solid #ccc;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       margin: 20px;
+      padding: 20px;
     }
 
     .bar {
@@ -45,7 +45,15 @@
 
     .chart-title {
       text-align: center;
-      margin-top: 0;
+      margin: 0;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .x-axis text {
+      transform: rotate(-45deg);
+      text-anchor: end;
+      font-size: 12px;
     }
   </style>
   <script src="https://d3js.org/d3.v5.min.js"></script>
@@ -53,16 +61,16 @@
 <body>
   <div id="charts-container">
     <div id="na-chart" class="chart">
-      <h3 class="chart-title">Top Games by Genre in NA</h3>
-      <svg width="500" height="400"></svg>
+      <h3 class="chart-title">Top Game Sales by Genre in NA</h3>
+      <svg width="600" height="400"></svg>
     </div>
     <div id="eu-chart" class="chart">
-      <h3 class="chart-title">Top Games by Genre in EU</h3>
-      <svg width="500" height="400"></svg>
+      <h3 class="chart-title">Top Game Sales by Genre in EU</h3>
+      <svg width="600" height="400"></svg>
     </div>
     <div id="jp-chart" class="chart">
-      <h3 class="chart-title">Top Games by Genre in JP</h3>
-      <svg width="500" height="400"></svg>
+      <h3 class="chart-title">Top Game Sales by Genre in JP</h3>
+      <svg width="600" height="400"></svg>
     </div>
     <div id="global-chart" class="chart">
       <h3 class="chart-title">Global Sales Over Time</h3>
@@ -72,37 +80,43 @@
 
   <script>
     // Set up the SVG dimensions and margins for bar charts
-    const margin = { top: 20, right: 30, bottom: 50, left: 60 };
-    const width = 500 - margin.left - margin.right;
+    const margin = { top: 20, right: 30, bottom: 70, left: 60 };
+    const width = 600 - margin.left - margin.right;
     const height = 400 - margin.top - margin.bottom;
 
-    function createBarChart(container, salesData, region, genre) {
+    function createBarChart(container, salesData, region, title) {
       const svg = d3.select(container).select("svg")
         .append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
+      const genreData = d3.nest()
+        .key(d => d.Genre)
+        .rollup(values => d3.sum(values, d => d[`${region}_Sales`]))
+        .entries(salesData)
+        .sort((a, b) => d3.descending(a.value, b.value));
+
       const xScale = d3.scaleBand()
         .range([0, width])
         .padding(0.1)
-        .domain(salesData.map(d => d.Name));
+        .domain(genreData.map(d => d.key));
 
       const yScale = d3.scaleLinear()
         .range([height, 0])
-        .domain([0, d3.max(salesData, d => +d[`${region}_Sales`])]);
+        .domain([0, d3.max(genreData, d => d.value)]);
 
       svg.append("g")
         .selectAll(".bar")
-        .data(salesData)
+        .data(genreData)
         .enter()
         .append("rect")
         .attr("class", "bar")
-        .attr("x", d => xScale(d.Name))
-        .attr("y", d => yScale(d[`${region}_Sales`]))
+        .attr("x", d => xScale(d.key))
+        .attr("y", d => yScale(d.value))
         .attr("width", xScale.bandwidth())
-        .attr("height", d => height - yScale(d[`${region}_Sales`]));
+        .attr("height", d => height - yScale(d.value));
 
       svg.append("g")
-        .attr("class", "axis")
+        .attr("class", "axis x-axis")
         .attr("transform", `translate(0,${height})`)
         .call(d3.axisBottom(xScale))
         .selectAll("text")
@@ -115,9 +129,9 @@
 
       svg.append("text")
         .attr("x", width / 2)
-        .attr("y", height + margin.bottom - 10)
+        .attr("y", height + margin.bottom - 20)
         .style("text-anchor", "middle")
-        .text("Games");
+        .text("Genre");
 
       svg.append("text")
         .attr("transform", "rotate(-90)")
@@ -155,7 +169,7 @@
       svg.append("g")
         .attr("class", "axis")
         .attr("transform", `translate(0,${height})`)
-        .call(d3.axisBottom(xScale));
+        .call(d3.axisBottom(xScale).tickFormat(d3.format("d")));
 
       svg.append("g")
         .attr("class", "axis")
@@ -163,7 +177,7 @@
 
       svg.append("text")
         .attr("x", width / 2)
-        .attr("y", height + margin.bottom - 10)
+        .attr("y", height + margin.bottom - 20)
         .style("text-anchor", "middle")
         .text("Year");
 
@@ -186,16 +200,12 @@
         d.Global_Sales = +d.Global_Sales;
       });
 
-      // Filter data by genre and region for the bar charts
-      const naTopGames = data.filter(d => d.Genre === "Sports");
-      const euTopGames = data.filter(d => d.Genre === "Platform");
-      const jpTopGames = data.filter(d => d.Genre === "Racing");
+      // Create bar charts for each region by genre
+      createBarChart("#na-chart", data, "NA", "Top Game Sales by Genre in NA");
+      createBarChart("#eu-chart", data, "EU", "Top Game Sales by Genre in EU");
+      createBarChart("#jp-chart", data, "JP", "Top Game Sales by Genre in JP");
 
-      createBarChart("#na-chart", naTopGames, "NA", "Sports");
-      createBarChart("#eu-chart", euTopGames, "EU", "Platform");
-      createBarChart("#jp-chart", jpTopGames, "JP", "Racing");
-
-      // Global sales over time
+      // Create global sales line chart
       createLineChart("#global-chart", data);
     });
   </script>
