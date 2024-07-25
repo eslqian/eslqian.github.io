@@ -45,13 +45,13 @@
     }
 
     .axis text {
-      font-size: 12px;
+      font-size: 14px;
     }
 
     .chart-title {
       text-align: center;
       margin: 0;
-      font-size: 18px;
+      font-size: 20px;
       font-weight: bold;
     }
 
@@ -62,7 +62,7 @@
     }
 
     .legend {
-      font-size: 12px;
+      font-size: 14px;
     }
   </style>
   <script src="https://d3js.org/d3.v5.min.js"></script>
@@ -71,27 +71,27 @@
   <div id="charts-container">
     <div id="na-chart" class="chart">
       <h3 class="chart-title">Top Game Sales by Genre in NA</h3>
-      <svg width="600" height="400"></svg>
+      <svg width="800" height="500"></svg>
     </div>
     <div id="eu-chart" class="chart">
       <h3 class="chart-title">Top Game Sales by Genre in EU</h3>
-      <svg width="600" height="400"></svg>
+      <svg width="800" height="500"></svg>
     </div>
     <div id="jp-chart" class="chart">
       <h3 class="chart-title">Top Game Sales by Genre in JP</h3>
-      <svg width="600" height="400"></svg>
+      <svg width="800" height="500"></svg>
     </div>
     <div id="global-chart" class="chart">
       <h3 class="chart-title">Global Sales Over Time by Genre</h3>
-      <svg width="600" height="400"></svg>
+      <svg width="800" height="500"></svg>
     </div>
   </div>
 
   <script>
-    // Set up the SVG dimensions and margins for bar charts
-    const margin = { top: 20, right: 30, bottom: 70, left: 60 };
-    const width = 600 - margin.left - margin.right;
-    const height = 400 - margin.top - margin.bottom;
+    // Set up the SVG dimensions and margins for the charts
+    const margin = { top: 20, right: 30, bottom: 100, left: 70 };
+    const width = 800 - margin.left - margin.right;
+    const height = 500 - margin.top - margin.bottom;
 
     function createBarChart(container, salesData, region, title) {
       const svg = d3.select(container).select("svg")
@@ -138,7 +138,7 @@
 
       svg.append("text")
         .attr("x", width / 2)
-        .attr("y", height + margin.bottom - 20)
+        .attr("y", height + margin.bottom - 40)
         .style("text-anchor", "middle")
         .text("Genre");
 
@@ -200,7 +200,7 @@
 
       svg.append("text")
         .attr("x", width / 2)
-        .attr("y", height + margin.bottom - 20)
+        .attr("y", height + margin.bottom - 40)
         .style("text-anchor", "middle")
         .text("Year");
 
@@ -217,7 +217,7 @@
         .enter()
         .append("g")
         .attr("class", "legend")
-        .attr("transform", (d, i) => `translate(${i * 80}, ${height + margin.bottom - 10})`);
+        .attr("transform", (d, i) => `translate(${i * 70}, ${height + margin.bottom - 20})`);
 
       legend.append("rect")
         .attr("x", 0)
