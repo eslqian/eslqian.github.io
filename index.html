@@ -6,26 +6,45 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f9f9f9;
+      background-color: #f2f2f2;
       margin: 0;
       padding: 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
+      height: 100vh;
     }
 
-    #charts-container {
+    .genre-btn {
+      margin: 10px;
+      padding: 15px 30px;
+      font-size: 16px;
+      cursor: pointer;
+      background-color: #007BFF;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      text-align: center;
+    }
+
+    .genre-btn:hover {
+      background-color: #0056b3;
+    }
+
+    .chart-title {
+      text-align: center;
+      font-size: 22px;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+
+    #chart-container {
       display: flex;
-      flex-direction: column;
+      justify-content: center;
       align-items: center;
-    }
-
-    .chart {
-      background-color: #fff;
-      border: 1px solid #ccc;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      margin: 30px;
-      padding: 20px;
+      width: 100%;
+      height: 600px;
     }
 
     .bar {
@@ -48,60 +67,54 @@
       font-size: 14px;
     }
 
-    .chart-title {
-      text-align: center;
-      margin: 0;
-      font-size: 22px;
-      font-weight: bold;
-    }
-
-    .x-axis text {
-      transform: rotate(-45deg);
-      text-anchor: end;
-      font-size: 12px;
-    }
-
-    .legend {
-      font-size: 14px;
-    }
   </style>
   <script src="https://d3js.org/d3.v5.min.js"></script>
 </head>
 <body>
-  <div id="charts-container">
-    <div id="na-chart" class="chart">
-      <h3 class="chart-title">Top Game Sales by Genre in NA</h3>
-      <svg width="1000" height="600"></svg>
-    </div>
-    <div id="eu-chart" class="chart">
-      <h3 class="chart-title">Top Game Sales by Genre in EU</h3>
-      <svg width="1000" height="600"></svg>
-    </div>
-    <div id="jp-chart" class="chart">
-      <h3 class="chart-title">Top Game Sales by Genre in JP</h3>
-      <svg width="1000" height="600"></svg>
-    </div>
-    <div id="global-chart" class="chart">
-      <h3 class="chart-title">Global Sales Over Time by Genre</h3>
-      <svg width="1000" height="600"></svg>
-    </div>
+  <div>
+    <h1>Select a Chart</h1>
+    <button class="genre-btn" onclick="showChart('NA')">NA Sales by Genre</button>
+    <button class="genre-btn" onclick="showChart('EU')">EU Sales by Genre</button>
+    <button class="genre-btn" onclick="showChart('JP')">JP Sales by Genre</button>
+    <button class="genre-btn" onclick="showChart('Global')">Global Sales Over Time</button>
+  </div>
+
+  <div id="chart-container">
+    <svg width="1000" height="600"></svg>
   </div>
 
   <script>
-    // Set up the SVG dimensions and margins for the charts
     const margin = { top: 20, right: 30, bottom: 150, left: 70 };
     const width = 1000 - margin.left - margin.right;
     const height = 600 - margin.top - margin.bottom;
 
-    function createBarChart(container, salesData, region, title) {
-      const svg = d3.select(container).select("svg")
-        .append("g")
-        .attr("transform", `translate(${margin.left},${margin.top})`);
+    function showChart(type) {
+      const svg = d3.select("#chart-container svg");
+      svg.selectAll("*").remove(); // Clear previous chart
 
+      d3.csv("https://raw.githubusercontent.com/eslqian/eslqian.github.io/main/data/vgsales.csv").then(data => {
+        data.forEach(d => {
+          d.Year = +d.Year;
+          d.NA_Sales = +d.NA_Sales;
+          d.EU_Sales = +d.EU_Sales;
+          d.JP_Sales = +d.JP_Sales;
+          d.Global_Sales = +d.Global_Sales;
+        });
+
+        if (type === 'NA' || type === 'EU' || type === 'JP') {
+          showBarChart(svg, data, type);
+        } else if (type === 'Global') {
+          showLineChart(svg, data);
+        }
+      });
+    }
+
+    function showBarChart(svg, data, region) {
+      const salesKey = `${region}_Sales`;
       const genreData = d3.nest()
         .key(d => d.Genre)
-        .rollup(values => d3.sum(values, d => d[`${region}_Sales`]))
-        .entries(salesData)
+        .rollup(values => d3.sum(values, d => d[salesKey]))
+        .entries(data)
         .sort((a, b) => d3.descending(a.value, b.value));
 
       const xScale = d3.scaleBand()
@@ -150,11 +163,7 @@
         .text(`${region} Sales (millions)`);
     }
 
-    function createLineChart(container, salesData) {
-      const svg = d3.select(container).select("svg")
-        .append("g")
-        .attr("transform", `translate(${margin.left},${margin.top})`);
-
+    function showLineChart(svg, data) {
       const genres = ["Action", "Adventure", "Fighting", "Misc", "Platform", "Puzzle", "Racing", "Role-Playing", "Shooter", "Simulation", "Sports", "Strategy"];
       const genreColors = d3.scaleOrdinal(d3.schemeCategory10).domain(genres);
 
@@ -162,10 +171,10 @@
         .key(d => d.Genre)
         .key(d => d.Year)
         .rollup(values => d3.sum(values, d => d.Global_Sales))
-        .entries(salesData);
+        .entries(data);
 
       const xScale = d3.scaleLinear()
-        .domain(d3.extent(salesData, d => +d.Year))
+        .domain(d3.extent(data, d => +d.Year))
         .range([0, width]);
 
       const yScale = d3.scaleLinear()
@@ -231,25 +240,8 @@
         .text(d => d);
     }
 
-    // Load data from the CSV file
-    d3.csv("https://raw.githubusercontent.com/eslqian/eslqian.github.io/main/data/vgsales.csv").then(function(data) {
-      // Convert numeric values from strings to numbers
-      data.forEach(d => {
-        d.Year = +d.Year;
-        d.NA_Sales = +d.NA_Sales;
-        d.EU_Sales = +d.EU_Sales;
-        d.JP_Sales = +d.JP_Sales;
-        d.Global_Sales = +d.Global_Sales;
-      });
-
-      // Create bar charts for each region by genre
-      createBarChart("#na-chart", data, "NA", "Top Game Sales by Genre in NA");
-      createBarChart("#eu-chart", data, "EU", "Top Game Sales by Genre in EU");
-      createBarChart("#jp-chart", data, "JP", "Top Game Sales by Genre in JP");
-
-      // Create global sales line chart
-      createLineChart("#global-chart", data);
-    });
+    // Initialize with a default chart
+    showChart('NA');
   </script>
 </body>
 </html>
