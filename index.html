@@ -88,7 +88,7 @@
   </div>
 
   <script>
-    const margin = { top: 20, right: 30, bottom: 150, left: 70 };
+    const margin = { top: 20, right: 30, bottom: 200, left: 70 };
     const width = 1200 - margin.left - margin.right;
     const height = 700 - margin.top - margin.bottom;
 
@@ -147,7 +147,8 @@
         .call(d3.axisBottom(xScale))
         .selectAll("text")
         .attr("transform", "rotate(-45)")
-        .style("text-anchor", "end");
+        .style("text-anchor", "end")
+        .style("font-size", "12px");
 
       svg.append("g")
         .attr("class", "axis")
@@ -155,8 +156,9 @@
 
       svg.append("text")
         .attr("x", width / 2)
-        .attr("y", height + margin.bottom - 60)
+        .attr("y", height + margin.bottom - 50)
         .style("text-anchor", "middle")
+        .style("font-size", "16px")
         .text("Genre");
 
       svg.append("text")
@@ -164,6 +166,7 @@
         .attr("x", -height / 2)
         .attr("y", -margin.left + 20)
         .style("text-anchor", "middle")
+        .style("font-size", "16px")
         .text(`${region} Sales (millions)`);
 
       // Add annotations
@@ -219,7 +222,9 @@
       svg.append("g")
         .attr("class", "axis")
         .attr("transform", `translate(0,${height})`)
-        .call(d3.axisBottom(xScale).tickFormat(d3.format("d")));
+        .call(d3.axisBottom(xScale).tickFormat(d3.format("d")))
+        .selectAll("text")
+        .style("font-size", "12px");
 
       svg.append("g")
         .attr("class", "axis")
@@ -227,8 +232,9 @@
 
       svg.append("text")
         .attr("x", width / 2)
-        .attr("y", height + margin.bottom - 60)
+        .attr("y", height + margin.bottom - 50)
         .style("text-anchor", "middle")
+        .style("font-size", "16px")
         .text("Year");
 
       svg.append("text")
@@ -236,6 +242,7 @@
         .attr("x", -height / 2)
         .attr("y", -margin.left + 20)
         .style("text-anchor", "middle")
+        .style("font-size", "16px")
         .text("Global Sales (millions)");
 
       // Add legend
