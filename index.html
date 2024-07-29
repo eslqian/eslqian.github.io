@@ -187,12 +187,12 @@
       let annotationTitle, annotationLabel, annotationX, annotationY;
       if (region === 'NA') {
         annotationTitle = "Action Dominates";
-        annotationLabel = "Action genre leads the market, with significantly higher sales compared to other genres.";
+        annotationLabel = "Action genre leads the market in NA, with significantly higher sales compared to other genres.";
         annotationX = xScale('Action') + xScale.bandwidth() / 2;
         annotationY = yScale(genreData.find(d => d.key === 'Action').value) / 2;
       } else if (region === 'EU') {
-        annotationTitle = "Sports Lead";
-        annotationLabel = "Sports games have a notable lead, with Adventure and Racing following closely.";
+        annotationTitle = "Action Lead";
+        annotationLabel = "Action games have a notable lead in EU, with Sports and Shooter following closely.";
         annotationX = xScale('Sports') + xScale.bandwidth() / 2;
         annotationY = yScale(genreData.find(d => d.key === 'Sports').value) / 2;
       } else if (region === 'JP') {
@@ -319,8 +319,8 @@
         const annotations = [
           {
             note: {
-              label: "Peak in racing genre sales.",
-              title: "Racing Peak",
+              label: "Video Games in the Action genre have multiple high peaks.",
+              title: "Action Peaks",
               wrap: 200,  // Wrap the text if it's too long
               align: "middle"  // Center align the text
             },
