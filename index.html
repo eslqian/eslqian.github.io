@@ -189,17 +189,17 @@
         annotationTitle = "Action Dominates";
         annotationLabel = "Action genre leads the market, with significantly higher sales compared to other genres.";
         annotationX = xScale('Action') + xScale.bandwidth() / 2;
-        annotationY = yScale(genreData.find(d => d.key === 'Action').value);
+        annotationY = yScale(genreData.find(d => d.key === 'Action').value) / 2;
       } else if (region === 'EU') {
         annotationTitle = "Sports Lead";
         annotationLabel = "Sports games have a notable lead, with Adventure and Racing following closely.";
         annotationX = xScale('Sports') + xScale.bandwidth() / 2;
-        annotationY = yScale(genreData.find(d => d.key === 'Sports').value);
+        annotationY = yScale(genreData.find(d => d.key === 'Sports').value) / 2;
       } else if (region === 'JP') {
         annotationTitle = "Role-Playing Preference";
         annotationLabel = "Role-Playing games dominate the Japanese market, with significant sales over other genres.";
         annotationX = xScale('Role-Playing') + xScale.bandwidth() / 2;
-        annotationY = yScale(genreData.find(d => d.key === 'Role-Playing').value);
+        annotationY = yScale(genreData.find(d => d.key === 'Role-Playing').value) / 2;
       }
 
       const annotations = [
@@ -211,10 +211,10 @@
             align: "middle"  // Center align the text
           },
           x: annotationX,
-          y: annotationY - 50,  // Position above the bar
-          dy: -50,
+          y: annotationY,
+          dy: 0,
           dx: 0,
-          color: "#FF5733"  // Use a contrasting color for the text
+          color: "black"  // Set the text color to black
         }
       ];
 
@@ -325,10 +325,10 @@
               align: "middle"  // Center align the text
             },
             x: xScale(racingData.key),
-            y: yScale(racingData.value) - 50,  // Position above the line
-            dy: -50,
+            y: yScale(racingData.value) / 2,
+            dy: 0,
             dx: 0,
-            color: "#FF5733"  // Use a contrasting color for the text
+            color: "black"  // Set the text color to black
           }
         ];
 
