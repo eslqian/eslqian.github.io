@@ -70,6 +70,20 @@
     .legend text {
       font-size: 14px;
     }
+
+    .annotation-label {
+      font-size: 14px;
+      fill: black;
+    }
+
+    .annotation-note-title {
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .annotation-note-label {
+      font-size: 12px;
+    }
   </style>
   <script src="https://d3js.org/d3.v5.min.js"></script>
   <script src="https://rawgit.com/susielu/d3-annotation/master/d3-annotation.min.js"></script>
@@ -172,16 +186,31 @@
       // Add annotations
       const annotations = [
         {
-          note: { label: "Highest sales in NA for Sports genre.", title: "Top Genre" },
+          note: {
+            label: "Highest sales in NA for Sports genre.",
+            title: "Top Genre"
+          },
           x: xScale('Sports') + xScale.bandwidth() / 2,
           y: yScale(genreData.find(d => d.key === 'Sports').value),
-          dy: -30,
-          dx: -50
+          dy: -100,
+          dx: 100,
+          color: "black"
         }
       ];
 
-      const makeAnnotations = d3.annotation().annotations(annotations);
-      svg.append("g").call(makeAnnotations);
+      const makeAnnotations = d3.annotation()
+        .type(d3.annotationLabel)
+        .annotations(annotations)
+        .on("subjectover", function(annotation) {
+          d3.select(annotation.subject).style("fill-opacity", 0.2);
+        })
+        .on("subjectout", function(annotation) {
+          d3.select(annotation.subject).style("fill-opacity", 1);
+        });
+
+      svg.append("g")
+        .attr("class", "annotation-group")
+        .call(makeAnnotations);
     }
 
     function showLineChart(svg, data) {
@@ -267,16 +296,31 @@
       // Add annotations
       const annotations = [
         {
-          note: { label: "Peak in racing genre sales.", title: "Racing Peak" },
+          note: {
+            label: "Peak in racing genre sales.",
+            title: "Racing Peak"
+          },
           x: xScale(2008),
           y: yScale(genreData.find(g => g.key === 'Racing').values.find(d => +d.key === 2008).value),
-          dy: -40,
-          dx: 40
+          dy: -100,
+          dx: 100,
+          color: "black"
         }
       ];
 
-      const makeAnnotations = d3.annotation().annotations(annotations);
-      svg.append("g").call(makeAnnotations);
+      const makeAnnotations = d3.annotation()
+        .type(d3.annotationLabel)
+        .annotations(annotations)
+        .on("subjectover", function(annotation) {
+          d3.select(annotation.subject).style("fill-opacity", 0.2);
+        })
+        .on("subjectout", function(annotation) {
+          d3.select(annotation.subject).style("fill-opacity", 1);
+        });
+
+      svg.append("g")
+        .attr("class", "annotation-group")
+        .call(makeAnnotations);
     }
 
     // Initialize with a default chart
