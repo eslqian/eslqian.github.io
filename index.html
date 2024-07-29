@@ -72,6 +72,7 @@
     }
   </style>
   <script src="https://d3js.org/d3.v5.min.js"></script>
+  <script src="https://rawgit.com/susielu/d3-annotation/master/d3-annotation.min.js"></script>
 </head>
 <body>
   <div>
@@ -164,6 +165,20 @@
         .attr("y", -margin.left + 20)
         .style("text-anchor", "middle")
         .text(`${region} Sales (millions)`);
+
+      // Add annotations
+      const annotations = [
+        {
+          note: { label: "Highest sales in NA for Sports genre.", title: "Top Genre" },
+          x: xScale('Sports') + xScale.bandwidth() / 2,
+          y: yScale(genreData.find(d => d.key === 'Sports').value),
+          dy: -30,
+          dx: -50
+        }
+      ];
+
+      const makeAnnotations = d3.annotation().annotations(annotations);
+      svg.append("g").call(makeAnnotations);
     }
 
     function showLineChart(svg, data) {
@@ -241,6 +256,20 @@
         .attr("x", 15)
         .attr("y", 9)
         .text(d => d);
+
+      // Add annotations
+      const annotations = [
+        {
+          note: { label: "Peak in racing genre sales.", title: "Racing Peak" },
+          x: xScale(2008),
+          y: yScale(genreData.find(g => g.key === 'Racing').values.find(d => +d.key === 2008).value),
+          dy: -40,
+          dx: 40
+        }
+      ];
+
+      const makeAnnotations = d3.annotation().annotations(annotations);
+      svg.append("g").call(makeAnnotations);
     }
 
     // Initialize with a default chart
