@@ -77,7 +77,7 @@
     }
 
     .annotation-note-title {
-      font-size: 12px;
+      font-size: 14px;
       font-weight: bold;
     }
 
@@ -206,13 +206,15 @@
         {
           note: {
             label: annotationLabel,
-            title: annotationTitle
+            title: annotationTitle,
+            wrap: 200,  // Wrap the text if it's too long
+            align: "middle"  // Center align the text
           },
           x: annotationX,
-          y: annotationY,
-          dy: -20,
-          dx: 50,
-          color: "black"
+          y: annotationY - 50,  // Position above the bar
+          dy: -50,
+          dx: 0,
+          color: "#FF5733"  // Use a contrasting color for the text
         }
       ];
 
@@ -318,13 +320,15 @@
           {
             note: {
               label: "Peak in racing genre sales.",
-              title: "Racing Peak"
+              title: "Racing Peak",
+              wrap: 200,  // Wrap the text if it's too long
+              align: "middle"  // Center align the text
             },
             x: xScale(racingData.key),
-            y: yScale(racingData.value),
-            dy: -20,
-            dx: 50,
-            color: "black"
+            y: yScale(racingData.value) - 50,  // Position above the line
+            dy: -50,
+            dx: 0,
+            color: "#FF5733"  // Use a contrasting color for the text
           }
         ];
 
