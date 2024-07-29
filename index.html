@@ -178,7 +178,7 @@
       svg.append("text")
         .attr("transform", "rotate(-90)")
         .attr("x", -height / 2)
-        .attr("y", -margin.left + 20)
+        .attr("y", -margin.left + 50)
         .style("text-anchor", "middle")
         .style("font-size", "16px")
         .text(`${region} Sales (millions)`);
@@ -192,8 +192,8 @@
           },
           x: xScale('Sports') + xScale.bandwidth() / 2,
           y: yScale(genreData.find(d => d.key === 'Sports').value),
-          dy: -100,
-          dx: 100,
+          dy: -20,
+          dx: 50,
           color: "black"
         }
       ];
@@ -302,8 +302,8 @@
           },
           x: xScale(2008),
           y: yScale(genreData.find(g => g.key === 'Racing').values.find(d => +d.key === 2008).value),
-          dy: -100,
-          dx: 100,
+          dy: -20,
+          dx: 50,
           color: "black"
         }
       ];
