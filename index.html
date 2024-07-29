@@ -119,19 +119,15 @@
           d.Global_Sales = +d.Global_Sales;
         });
 
-        if (type === 'NA') {
-          showBarChart(svg, data, 'NA', 'Action', 'Action Genre had the highest sales in NA');
-        } else if (type === 'EU') {
-          showBarChart(svg, data, 'EU', 'Action', 'Action Genre had the highest sales in EU');
-        } else if (type === 'JP') {
-          showBarChart(svg, data, 'JP', 'Role-Playing', 'Role-Playing Genre had the highest sales in JP');
+        if (type === 'NA' || type === 'EU' || type === 'JP') {
+          showBarChart(svg, data, type);
         } else if (type === 'Global') {
           showLineChart(svg, data);
         }
       });
     }
 
-    function showBarChart(svg, data, region, topGenre, annotationLabel) {
+    function showBarChart(svg, data, region) {
       const salesKey = `${region}_Sales`;
       const genreData = d3.nest()
         .key(d => d.Genre)
@@ -191,12 +187,12 @@
       const annotations = [
         {
           note: {
-            label: annotationLabel,
+            label: "Highest sales in NA for Sports genre.",
             title: "Top Genre"
           },
-          x: xScale(topGenre) + xScale.bandwidth() / 2,
-          y: yScale(genreData.find(d => d.key === topGenre).value),
-          dy: -50,
+          x: xScale('Sports') + xScale.bandwidth() / 2,
+          y: yScale(genreData.find(d => d.key === 'Sports').value),
+          dy: -20,
           dx: 50,
           color: "black"
         }
@@ -205,13 +201,11 @@
       const makeAnnotations = d3.annotation()
         .type(d3.annotationLabel)
         .annotations(annotations)
-        .accessors({
-          x: d => xScale(d.key) + xScale.bandwidth() / 2,
-          y: d => yScale(d.value)
+        .on("subjectover", function(annotation) {
+          d3.select(annotation.subject).style("fill-opacity", 0.2);
         })
-        .accessorsInverse({
-          key: d => d.key,
-          value: d => yScale.invert(d.y)
+        .on("subjectout", function(annotation) {
+          d3.select(annotation.subject).style("fill-opacity", 1);
         });
 
       svg.append("g")
@@ -308,7 +302,7 @@
           },
           x: xScale(2008),
           y: yScale(genreData.find(g => g.key === 'Racing').values.find(d => +d.key === 2008).value),
-          dy: -50,
+          dy: -20,
           dx: 50,
           color: "black"
         }
@@ -317,13 +311,11 @@
       const makeAnnotations = d3.annotation()
         .type(d3.annotationLabel)
         .annotations(annotations)
-        .accessors({
-          x: d => xScale(d.key) + xScale.bandwidth() / 2,
-          y: d => yScale(d.value)
+        .on("subjectover", function(annotation) {
+          d3.select(annotation.subject).style("fill-opacity", 0.2);
         })
-        .accessorsInverse({
-          key: d => d.key,
-          value: d => yScale.invert(d.y)
+        .on("subjectout", function(annotation) {
+          d3.select(annotation.subject).style("fill-opacity", 1);
         });
 
       svg.append("g")
