@@ -119,19 +119,15 @@
           d.Global_Sales = +d.Global_Sales;
         });
 
-        if (type === 'NA') {
-          showBarChart(svg, data, 'NA', 'Action', 'Action Genre had the highest sales in NA');
-        } else if (type === 'EU') {
-          showBarChart(svg, data, 'EU', 'Action', 'Action Genre had the highest sales in EU');
-        } else if (type === 'JP') {
-          showBarChart(svg, data, 'JP', 'Role-Playing', 'Role-Playing Genre had the highest sales in JP');
+        if (type === 'NA' || type === 'EU' || type === 'JP') {
+          showBarChart(svg, data, type);
         } else if (type === 'Global') {
           showLineChart(svg, data);
         }
       });
     }
 
-    function showBarChart(svg, data, region, topGenre, annotationLabel) {
+    function showBarChart(svg, data, region) {
       const salesKey = `${region}_Sales`;
       const genreData = d3.nest()
         .key(d => d.Genre)
@@ -187,15 +183,33 @@
         .style("font-size", "16px")
         .text(`${region} Sales (millions)`);
 
-      // Add annotations
+      // Add annotations for each region
+      let annotationTitle, annotationLabel, annotationX, annotationY;
+      if (region === 'NA') {
+        annotationTitle = "Action Dominates";
+        annotationLabel = "Action genre leads the market, with significantly higher sales compared to other genres.";
+        annotationX = xScale('Action') + xScale.bandwidth() / 2;
+        annotationY = yScale(genreData.find(d => d.key === 'Action').value);
+      } else if (region === 'EU') {
+        annotationTitle = "Sports Lead";
+        annotationLabel = "Sports games have a notable lead, with Adventure and Racing following closely.";
+        annotationX = xScale('Sports') + xScale.bandwidth() / 2;
+        annotationY = yScale(genreData.find(d => d.key === 'Sports').value);
+      } else if (region === 'JP') {
+        annotationTitle = "Role-Playing Preference";
+        annotationLabel = "Role-Playing games dominate the Japanese market, with significant sales over other genres.";
+        annotationX = xScale('Role-Playing') + xScale.bandwidth() / 2;
+        annotationY = yScale(genreData.find(d => d.key === 'Role-Playing').value);
+      }
+
       const annotations = [
         {
           note: {
             label: annotationLabel,
-            title: "Top Genre"
+            title: annotationTitle
           },
-          x: xScale(topGenre) + xScale.bandwidth() / 2,
-          y: yScale(genreData.find(d => d.key === topGenre).value),
+          x: annotationX,
+          y: annotationY,
           dy: -20,
           dx: 50,
           color: "black"
@@ -205,13 +219,11 @@
       const makeAnnotations = d3.annotation()
         .type(d3.annotationLabel)
         .annotations(annotations)
-        .accessors({
-          x: d => xScale(d.key) + xScale.bandwidth() / 2,
-          y: d => yScale(d.value)
+        .on("subjectover", function(annotation) {
+          d3.select(annotation.subject).style("fill-opacity", 0.2);
         })
-        .accessorsInverse({
-          key: d => d.key,
-          value: d => yScale.invert(d.y)
+        .on("subjectout", function(annotation) {
+          d3.select(annotation.subject).style("fill-opacity", 1);
         });
 
       svg.append("g")
@@ -299,36 +311,37 @@
         .attr("y", 9)
         .text(d => d);
 
-      // Add annotations
-      const annotations = [
-        {
-          note: {
-            label: "Action Genre has a lot of high peaks.",
-            title: "Action Peak"
-          },
-          x: xScale(2008),
-          y: yScale(genreData.find(g => g.key === 'Racing').values.find(d => +d.key === 2008).value),
-          dy: -20,
-          dx: 50,
-          color: "black"
-        }
-      ];
+      // Add annotations for global sales
+      const racingData = genreData.find(g => g.key === 'Racing').values.find(d => +d.key === 2008);
+      if (racingData) {
+        const annotations = [
+          {
+            note: {
+              label: "Peak in racing genre sales.",
+              title: "Racing Peak"
+            },
+            x: xScale(racingData.key),
+            y: yScale(racingData.value),
+            dy: -20,
+            dx: 50,
+            color: "black"
+          }
+        ];
 
-      const makeAnnotations = d3.annotation()
-        .type(d3.annotationLabel)
-        .annotations(annotations)
-        .accessors({
-          x: d => xScale(d.key) + xScale.bandwidth() / 2,
-          y: d => yScale(d.value)
-        })
-        .accessorsInverse({
-          key: d => d.key,
-          value: d => yScale.invert(d.y)
-        });
+        const makeAnnotations = d3.annotation()
+          .type(d3.annotationLabel)
+          .annotations(annotations)
+          .on("subjectover", function(annotation) {
+            d3.select(annotation.subject).style("fill-opacity", 0.2);
+          })
+          .on("subjectout", function(annotation) {
+            d3.select(annotation.subject).style("fill-opacity", 1);
+          });
 
-      svg.append("g")
-        .attr("class", "annotation-group")
-        .call(makeAnnotations);
+        svg.append("g")
+          .attr("class", "annotation-group")
+          .call(makeAnnotations);
+      }
     }
 
     // Initialize with a default chart
