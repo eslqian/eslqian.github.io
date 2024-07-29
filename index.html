@@ -91,10 +91,10 @@
 <body>
   <div>
     <h1>Select a Chart</h1>
-    <button class="genre-btn" onclick="showChart('NA')">NA Video Game Sales by Genre</button>
-    <button class="genre-btn" onclick="showChart('EU')">EU Video Game Sales by Genre</button>
-    <button class="genre-btn" onclick="showChart('JP')">JP Video Game Sales by Genre</button>
-    <button class="genre-btn" onclick="showChart('Global')">Global Video Game Sales Over Time</button>
+    <button class="genre-btn" onclick="showChart('NA')">NA Sales by Genre</button>
+    <button class="genre-btn" onclick="showChart('EU')">EU Sales by Genre</button>
+    <button class="genre-btn" onclick="showChart('JP')">JP Sales by Genre</button>
+    <button class="genre-btn" onclick="showChart('Global')">Global Sales Over Time</button>
   </div>
 
   <div id="chart-container">
@@ -183,15 +183,24 @@
         .style("font-size", "16px")
         .text(`${region} Sales (millions)`);
 
+      let annotationText = "";
+      if (region === 'NA') {
+        annotationText = "Action Genre had the highest sales in NA";
+      } else if (region === 'EU') {
+        annotationText = "Action Genre had the highest sales in EU";
+      } else if (region === 'JP') {
+        annotationText = "Role-Playing Genre had the highest sales in JP";
+      }
+
       // Add annotations
       const annotations = [
         {
           note: {
-            label: "Highest sales in NA for Sports genre.",
+            label: annotationText,
             title: "Top Genre"
           },
-          x: xScale('Sports') + xScale.bandwidth() / 2,
-          y: yScale(genreData.find(d => d.key === 'Sports').value),
+          x: xScale(genreData[0].key) + xScale.bandwidth() / 2,
+          y: yScale(genreData[0].value),
           dy: -20,
           dx: 50,
           color: "black"
@@ -256,75 +265,4 @@
         .style("font-size", "12px");
 
       svg.append("g")
-        .attr("class", "axis")
-        .call(d3.axisLeft(yScale));
-
-      svg.append("text")
-        .attr("x", width / 2)
-        .attr("y", height + margin.bottom - 50)
-        .style("text-anchor", "middle")
-        .style("font-size", "16px")
-        .text("Year");
-
-      svg.append("text")
-        .attr("transform", "rotate(-90)")
-        .attr("x", -height / 2)
-        .attr("y", -margin.left + 50)
-        .style("text-anchor", "middle")
-        .style("font-size", "16px")
-        .text("Global Sales (millions)");
-
-      // Add legend
-      const legend = svg.selectAll(".legend")
-        .data(genres)
-        .enter()
-        .append("g")
-        .attr("class", "legend")
-        .attr("transform", (d, i) => `translate(${(i % 6) * 200}, ${height + margin.bottom - 40 + Math.floor(i / 6) * 20})`);
-
-      legend.append("rect")
-        .attr("x", 0)
-        .attr("width", 10)
-        .attr("height", 10)
-        .style("fill", genreColors);
-
-      legend.append("text")
-        .attr("x", 15)
-        .attr("y", 9)
-        .text(d => d);
-
-      // Add annotations
-      const annotations = [
-        {
-          note: {
-            label: "Peak in racing genre sales.",
-            title: "Racing Peak"
-          },
-          x: xScale(2008),
-          y: yScale(genreData.find(g => g.key === 'Racing').values.find(d => +d.key === 2008).value),
-          dy: -20,
-          dx: 50,
-          color: "black"
-        }
-      ];
-
-      const makeAnnotations = d3.annotation()
-        .type(d3.annotationLabel)
-        .annotations(annotations)
-        .on("subjectover", function(annotation) {
-          d3.select(annotation.subject).style("fill-opacity", 0.2);
-        })
-        .on("subjectout", function(annotation) {
-          d3.select(annotation.subject).style("fill-opacity", 1);
-        });
-
-      svg.append("g")
-        .attr("class", "annotation-group")
-        .call(makeAnnotations);
-    }
-
-    // Initialize with a default chart
-    showChart('NA');
-  </script>
-</body>
-</html>
+        .attr("class
